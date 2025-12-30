@@ -1,0 +1,12 @@
+pre-commit:
+  parallel: true
+  commands:
+    biome:
+      run: bunx biome check ./src --diagnostic-level=error --write
+    types:
+      run: bunx tsc --project ./tsconfig.json
+    test:
+      run: bun test .
+
+commit-msg:
+  run: bunx commitlint --edit $1

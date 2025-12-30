@@ -6,21 +6,43 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "biome check ./src --diagnostic-level=error",
+    "test": "jest --coverage --runInBand --bail --no-cache --forceExit"
   },
   "dependencies": {
+    "@prisma/adapter-libsql": "^7.2.0",
+    "@prisma/client": "^7.2.0",
+    "cheerio": "^1.1.2",
     "next": "16.1.1",
+    "nodemailer": "^7.0.12",
     "react": "19.2.3",
-    "react-dom": "19.2.3"
+    "react-dom": "19.2.3",
+    "zod": "^4.2.1"
   },
   "devDependencies": {
+    "@biomejs/biome": "2.3.10",
+    "@commitlint/cli": "^20.2.0",
+    "@commitlint/config-conventional": "^20.2.0",
+    "@happy-dom/global-registrator": "^20.0.11",
     "@tailwindcss/postcss": "^4",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.1",
+    "@types/jest": "^30.0.0",
     "@types/node": "^20",
+    "@types/nodemailer": "^7.0.4",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "biome": "^0.3.3",
     "eslint": "^9",
     "eslint-config-next": "16.1.1",
+    "happy-dom": "^20.0.11",
+    "jest": "^30.2.0",
+    "jest-environment-jsdom": "^30.2.0",
+    "lefthook": "^2.0.13",
+    "prima": "^0.0.1",
+    "prisma": "^7.2.0",
     "tailwindcss": "^4",
+    "ts-jest": "^29.4.6",
     "typescript": "^5"
   },
   "ignoreScripts": [
