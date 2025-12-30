@@ -1,10 +1,8 @@
 .card {
-  /* Button resets */
   width: 100%;
   text-align: left;
   font: inherit;
 
-  /* Card styles */
   background: var(--bg-secondary);
   border-radius: var(--radius-md);
   padding: 1.5rem;
