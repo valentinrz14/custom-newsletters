@@ -10,6 +10,7 @@ afterEach(() => {
 const mockFeed: Feed & { posts: Post[] } = {
   id: "bun",
   name: "Bun",
+  nameEs: "Bun",
   url: "https://bun.com",
   lastScrapedAt: new Date(),
   createdAt: new Date(),
@@ -26,6 +27,8 @@ const mockFeed: Feed & { posts: Post[] } = {
     lastUpdatedAt: new Date(),
     createdAt: new Date(),
     updatedAt: new Date(),
+    titleEs: `Encabezado ${i}`,
+    contentEs: `Contenido ${i}`,
   })),
 };
 

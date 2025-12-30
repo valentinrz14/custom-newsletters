@@ -36,7 +36,7 @@ export default async function Page() {
           <SidebarNav
             feeds={activeFeeds.map((f: FeedWithPosts) => ({
               id: f.id,
-              name: f.name,
+              name: f.nameEs || f.name,
             }))}
           />
         )}

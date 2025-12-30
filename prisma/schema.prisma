@@ -9,6 +9,7 @@ datasource db {
 model Feed {
   id            String   @id
   name          String
+  nameEs        String?  // Spanish translation
   url           String
   lastScrapedAt DateTime?
   posts         Post[]
@@ -21,8 +22,10 @@ model Post {
   feedId        String
   feed          Feed     @relation(fields: [feedId], references: [id], onDelete: Cascade)
   title         String
+  titleEs       String?  // Spanish translation
   url           String
   content       String?
+  contentEs     String?  // Spanish translation
   publishedAt   DateTime?
   firstSeenAt   DateTime @default(now())
   lastUpdatedAt DateTime @default(now())

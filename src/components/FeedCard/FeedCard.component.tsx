@@ -16,10 +16,12 @@ export function FeedCard({ feed }: FeedCardProps) {
   const displayedPosts =
     isExpanded || !hasMore ? feed.posts : feed.posts.slice(0, 3);
 
+  const displayName = feed.nameEs || feed.name;
+
   return (
     <section id={feed.id} className={`${styles.section} scroll-mt-24`}>
       <header className={styles.header}>
-        <h2 className={styles.title}>{feed.name}</h2>
+        <h2 className={styles.title}>{displayName}</h2>
         {feed.lastScrapedAt && (
           <p className={styles.date}>
             Última actualización: {formatDate(new Date(feed.lastScrapedAt))}

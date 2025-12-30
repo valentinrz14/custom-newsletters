@@ -3,21 +3,29 @@ import { FEEDS } from "@/src/lib/feeds";
 import { hashContent } from "@/src/lib/hash";
 import { sendMail } from "@/src/lib/mail";
 import { scrapeAllFeeds } from "@/src/lib/scrapper";
+import { isLikelyEnglish, translate } from "@/src/lib/translator";
 
 export async function GET() {
   try {
     console.log("🚀 Starting weekly feed scraping...");
 
     for (const feedConfig of FEEDS) {
+      // Translate feed name if it's in English
+      const nameEs = isLikelyEnglish(feedConfig.name)
+        ? await translate(feedConfig.name)
+        : null;
+
       await db.feed.upsert({
         where: { id: feedConfig.id },
         create: {
           id: feedConfig.id,
           name: feedConfig.name,
+          nameEs,
           url: feedConfig.url,
         },
         update: {
           name: feedConfig.name,
+          nameEs,
           url: feedConfig.url,
         },
       });
@@ -43,12 +51,23 @@ export async function GET() {
         });
 
         if (!existingPost) {
+          // Translate if content is in English
+          const titleEs = isLikelyEnglish(scrapedPost.title)
+            ? await translate(scrapedPost.title)
+            : null;
+          const contentEs =
+            scrapedPost.content && isLikelyEnglish(scrapedPost.content)
+              ? await translate(scrapedPost.content)
+              : null;
+
           await db.post.create({
             data: {
               feedId,
               title: scrapedPost.title,
+              titleEs,
               url: scrapedPost.url,
               content: scrapedPost.content,
+              contentEs,
               publishedAt: scrapedPost.publishedAt,
               contentHash,
               firstSeenAt: new Date(),
@@ -57,11 +76,22 @@ export async function GET() {
           });
           newPostsCount++;
         } else if (existingPost.contentHash !== contentHash) {
+          // Translate if content is in English
+          const titleEs = isLikelyEnglish(scrapedPost.title)
+            ? await translate(scrapedPost.title)
+            : null;
+          const contentEs =
+            scrapedPost.content && isLikelyEnglish(scrapedPost.content)
+              ? await translate(scrapedPost.content)
+              : null;
+
           await db.post.update({
             where: { id: existingPost.id },
             data: {
               title: scrapedPost.title,
+              titleEs,
               content: scrapedPost.content,
+              contentEs,
               contentHash,
               lastUpdatedAt: new Date(),
               publishedAt: scrapedPost.publishedAt || existingPost.publishedAt,

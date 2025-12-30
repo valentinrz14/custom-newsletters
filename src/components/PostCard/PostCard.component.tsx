@@ -13,6 +13,9 @@ export function PostCard({ post }: PostCardProps) {
   const showUpdatedBadge =
     !showNewBadge && isRecentlyUpdated(post.firstSeenAt, post.lastUpdatedAt);
 
+  const displayTitle = post.titleEs || post.title;
+  const displayContent = post.contentEs || post.content;
+
   return (
     <button
       type="button"
@@ -22,7 +25,7 @@ export function PostCard({ post }: PostCardProps) {
       data-testid="post-card"
     >
       <div className={styles.header}>
-        <h3 className={styles.title}>{post.title}</h3>
+        <h3 className={styles.title}>{displayTitle}</h3>
         <div className={styles.badges}>
           {showNewBadge && (
             <span className={`${styles.badge} ${styles.badgeNew}`}>Nuevo</span>
@@ -39,11 +42,11 @@ export function PostCard({ post }: PostCardProps) {
           {getRelativeTime(post.lastUpdatedAt)}
         </time>
       </div>
-      {post.content && (
+      {displayContent && (
         <div className={styles.content}>
           {showDetails ? (
             <>
-              <p>{post.content}</p>
+              <p>{displayContent}</p>
               <a
                 href={post.url}
                 target="_blank"
@@ -55,7 +58,7 @@ export function PostCard({ post }: PostCardProps) {
               </a>
             </>
           ) : (
-            <p>{post.content.slice(0, 200)}...</p>
+            <p>{displayContent.slice(0, 200)}...</p>
           )}
         </div>
       )}
