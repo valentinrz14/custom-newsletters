@@ -15,13 +15,14 @@ export default async function Page() {
     },
   });
 
+  type FeedWithPosts = typeof feeds[number];
+
   const activeFeeds = feeds
-    .filter((feed) => feed.posts.length > 0)
-    .sort((a, b) => {
-      // Sort by most recent post update
+    .filter((feed: FeedWithPosts) => feed.posts.length > 0)
+    .sort((a: FeedWithPosts, b: FeedWithPosts) => {
       const aLastUpdate = a.posts[0]?.lastUpdatedAt.getTime() || 0;
       const bLastUpdate = b.posts[0]?.lastUpdatedAt.getTime() || 0;
-      return bLastUpdate - aLastUpdate; // Descending order
+      return bLastUpdate - aLastUpdate;
     });
 
   const hasAnyPosts = activeFeeds.length > 0;
