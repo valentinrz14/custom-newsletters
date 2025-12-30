@@ -1,0 +1,45 @@
+.sidebar {
+  padding-right: 1.5rem;
+  /* position: sticky;  <-- Removed, handled by grid layout now */
+  /* top: 2rem; */
+  /* height: fit-content; */
+}
+
+
+.title {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  letter-spacing: 0.1em;
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+
+.list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.link {
+  display: block;
+  padding: 0.5rem 0.75rem;
+  color: var(--text-secondary);
+  text-decoration: none;
+  border-radius: var(--radius-sm);
+  transition: all 0.2s ease;
+  font-weight: 500;
+  border-left: 2px solid transparent;
+}
+
+.link:hover {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.active {
+  color: var(--text-primary);
+  background: rgba(168, 85, 247, 0.1);
+  border-left-color: var(--accent-purple);
+}

@@ -1,50 +1,43 @@
 "use client";
 
 import { useState } from "react";
-import type { Feed, Post } from "@prisma/client";
-import { PostCard } from "./PostCard.component";
 import { formatDate } from "@/src/lib/date-utils";
-
-export interface FeedCardProps {
-  feed: Feed & {
-    posts: Post[];
-  };
-}
+import { PostCard } from "../PostCard/PostCard.component";
+import styles from "./FeedCard.module.css";
+import type { FeedCardProps } from "./FeedCardProps.interfaces";
 
 export function FeedCard({ feed }: FeedCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
 
   if (feed.posts.length === 0) return null;
 
-  const hasMore = feed.posts.length > 5;
+  const hasMore = feed.posts.length > 3;
   const displayedPosts =
-    isExpanded || !hasMore ? feed.posts : feed.posts.slice(0, 5);
+    isExpanded || !hasMore ? feed.posts : feed.posts.slice(0, 3);
 
   return (
-    <section id={feed.id} className="feed-section scroll-mt-24">
-      <header className="feed-header">
-        <h2 className="feed-title">{feed.name}</h2>
+    <section id={feed.id} className={`${styles.section} scroll-mt-24`}>
+      <header className={styles.header}>
+        <h2 className={styles.title}>{feed.name}</h2>
         {feed.lastScrapedAt && (
-          <p className="feed-date">
+          <p className={styles.date}>
             Última actualización: {formatDate(new Date(feed.lastScrapedAt))}
           </p>
         )}
       </header>
-
-      <div className="posts-container">
+      <div className={styles.postsContainer}>
         {displayedPosts.map((post) => (
           <PostCard key={post.id} post={post} />
         ))}
       </div>
-
       {hasMore && (
         <button
           type="button"
           onClick={() => setIsExpanded(!isExpanded)}
-          className="expand-button group"
+          className={`group ${styles.expandButton}`}
         >
           <span>
-            {isExpanded ? "Ver menos" : `Ver ${feed.posts.length - 5} más`}
+            {isExpanded ? "Ver menos" : `Ver ${feed.posts.length - 3} más`}
           </span>
           <svg
             className={`w-4 h-4 transition-transform duration-300 ${

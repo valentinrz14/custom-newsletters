@@ -1,7 +1,7 @@
 import { db } from "@/src/lib/db";
 import { FEEDS } from "@/src/lib/feeds";
-import { scrapeAllFeeds } from "@/src/lib/scrapper";
 import { hashContent } from "@/src/lib/hash";
+import { scrapeAllFeeds } from "@/src/lib/scrapper";
 
 export async function GET() {
   try {

@@ -1,13 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
-
-export interface SidebarNavProps {
-  feeds: { id: string; name: string }[];
-}
+import { useEffect, useRef, useState } from "react";
+import type { SidebarNavProps } from "./SidebarNav.interfaces";
+import styles from "./SidebarNav.module.css";
 
 export function SidebarNav({ feeds }: SidebarNavProps) {
   const [activeId, setActiveId] = useState<string>("");
+  const navRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -33,16 +32,31 @@ export function SidebarNav({ feeds }: SidebarNavProps) {
     return () => observer.disconnect();
   }, [feeds]);
 
+  // Auto-scroll sidebar to show active item
+  useEffect(() => {
+    if (activeId && navRef.current) {
+      const activeLink = navRef.current.querySelector(`a[href="#${activeId}"]`);
+      if (activeLink) {
+        activeLink.scrollIntoView({
+          behavior: "smooth",
+          block: "nearest",
+        });
+      }
+    }
+  }, [activeId]);
+
   return (
-    <aside className="sidebar-nav">
-      <nav className="sticky-nav">
-        <h3 className="nav-title">Fuentes</h3>
-        <ul className="nav-list">
+    <aside className={styles.sidebar} ref={navRef}>
+      <nav className={styles.stickyNav}>
+        <h3 className={styles.title}>Fuentes</h3>
+        <ul className={styles.list}>
           {feeds.map((feed) => (
             <li key={feed.id}>
               <a
                 href={`#${feed.id}`}
-                className={`nav-link ${activeId === feed.id ? "active" : ""}`}
+                className={`${styles.link} ${
+                  activeId === feed.id ? styles.active : ""
+                }`}
                 onClick={(e) => {
                   e.preventDefault();
                   document.getElementById(feed.id)?.scrollIntoView({

@@ -1,9 +1,10 @@
 // Script de test para verificar el scraping
-import { PrismaClient } from "@prisma/client";
+
 import { PrismaLibSql } from "@prisma/adapter-libsql";
+import { PrismaClient } from "@prisma/client";
 import { FEEDS } from "./src/lib/feeds";
-import { scrapeAllFeeds } from "./src/lib/scrapper";
 import { hashContent } from "./src/lib/hash";
+import { scrapeAllFeeds } from "./src/lib/scrapper";
 
 const adapter = new PrismaLibSql({
   url: process.env.DATABASE_URL || "file:./prisma/db.sqlite",

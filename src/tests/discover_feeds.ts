@@ -4,28 +4,19 @@ const CANDIDATES = [
   "https://react.statuscode.com",
   "https://thisweekinreact.com",
   "https://frontendfoc.us",
-  "https://www.joshwcomeau.com/newsletter/",
+  "https://www.joshwcomeau.com/",
   "https://reactnativenewsletter.com",
-  // "https://expo.dev/blog", // Already added
   "https://mobiledevweekly.com",
   "https://nodeweekly.com",
   "https://javascriptweekly.com",
-  "https://backendfoc.us",
-  // "https://bun.sh/blog", // Already added
-  "https://deno.com/newsletter",
+  "https://deno.com/blog",
   "https://edgeweekly.com",
   "https://devopsish.com",
   "https://increment.com",
-  "https://platformengineeringweekly.com",
-  "https://www.macstories.net",
   "https://swiftbysundell.com/newsletter/",
-  "https://www.lennysnewsletter.com",
   "https://stratechery.com",
   "https://softwareleadweekly.com",
-  "https://testingjavascript.com/newsletter",
-  "https://perf.email",
   "https://github.blog/changelog/",
-  "https://hackernewsletter.com",
 ];
 
 async function findFeed() {
@@ -81,8 +72,9 @@ async function findFeed() {
       } else {
         console.log(`⚠️  ${url}: No feed found`);
       }
-    } catch (error) {
-      console.log(`❌ ${url}: Error ${error.message}`);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "Unknown error";
+      console.log(`❌ ${url}: Error ${message}`);
     }
   }
 }

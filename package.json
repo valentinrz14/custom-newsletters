@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "biome check ./src --diagnostic-level=error",
-    "test": "jest --coverage --runInBand --bail --no-cache --forceExit"
+    "test": "jest --coverage --runInBand --bail --no-cache --forceExit",
+    "types": "tsc -p tsconfig.json --noEmit --skipLibCheck"
   },
   "dependencies": {
     "@prisma/adapter-libsql": "^7.2.0",
@@ -33,6 +34,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "biome": "^0.3.3",
+    "bun-types": "^1.3.5",
     "eslint": "^9",
     "eslint-config-next": "16.1.1",
     "happy-dom": "^20.0.11",

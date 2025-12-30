@@ -2,7 +2,7 @@ pre-commit:
   parallel: true
   commands:
     biome:
-      run: bunx biome check ./src --diagnostic-level=error --write
+      run: bunx biome check ./src --diagnostic-level=error
     types:
       run: bunx tsc --project ./tsconfig.json
     test:

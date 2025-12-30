@@ -44,20 +44,6 @@ export const FEEDS: FeedConfig[] = [
       content: "p",
     },
   },
-
-  {
-    id: "vscode",
-    name: "VS Code",
-    url: "https://code.visualstudio.com/updates",
-    type: "updates",
-    selectors: {
-      container: "article",
-      title: "h2, h1",
-      link: "a",
-      date: "time",
-      content: "p",
-    },
-  },
   {
     id: "cursor",
     name: "Cursor",
@@ -127,20 +113,7 @@ export const FEEDS: FeedConfig[] = [
       content: "description",
     },
   },
-  {
-    id: "software-mansion",
-    name: "Software Mansion",
-    url: "https://blog.swmansion.com/feed",
-    type: "blog",
-    isXml: true,
-    selectors: {
-      container: "item",
-      title: "title",
-      link: "link",
-      date: "pubDate",
-      content: "content\\:encoded, description",
-    },
-  },
+
   {
     id: "react-status",
     name: "React Status",
@@ -226,20 +199,6 @@ export const FEEDS: FeedConfig[] = [
     },
   },
   {
-    id: "backend-focus",
-    name: "Backend Focus",
-    url: "https://backendfoc.us/rss/",
-    type: "news",
-    isXml: true,
-    selectors: {
-      container: "item",
-      title: "title",
-      link: "link",
-      date: "pubDate",
-      content: "description",
-    },
-  },
-  {
     id: "deno-news",
     name: "Deno News",
     url: "https://deno.com/feed",
@@ -271,20 +230,6 @@ export const FEEDS: FeedConfig[] = [
     id: "increment",
     name: "Increment",
     url: "https://increment.com/feed.xml",
-    type: "blog",
-    isXml: true,
-    selectors: {
-      container: "item",
-      title: "title",
-      link: "link",
-      date: "pubDate",
-      content: "description",
-    },
-  },
-  {
-    id: "macstories",
-    name: "MacStories",
-    url: "https://www.macstories.net/feed/",
     type: "blog",
     isXml: true,
     selectors: {
@@ -338,20 +283,6 @@ export const FEEDS: FeedConfig[] = [
     },
   },
   {
-    id: "perf-email",
-    name: "Perf.email",
-    url: "https://perf.email/rss",
-    type: "news",
-    isXml: true,
-    selectors: {
-      container: "item",
-      title: "title",
-      link: "link",
-      date: "pubDate",
-      content: "description",
-    },
-  },
-  {
     id: "github-blog",
     name: "GitHub Blog",
     url: "https://github.blog/feed/",
@@ -393,20 +324,7 @@ export const FEEDS: FeedConfig[] = [
       content: "description",
     },
   },
-  {
-    id: "software-lead-weekly",
-    name: "Software Lead Weekly (Unofficial)",
-    url: "https://swlw-rss.netlify.app/rss.xml",
-    type: "news",
-    isXml: true,
-    selectors: {
-      container: "item",
-      title: "title",
-      link: "link",
-      date: "pubDate",
-      content: "description",
-    },
-  },
+
   {
     id: "hacker-news",
     name: "Hacker News (Frontpage)",

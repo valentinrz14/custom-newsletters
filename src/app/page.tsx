@@ -1,6 +1,6 @@
-import { EmptyState } from "@/src/components/EmptyState.component";
-import { FeedCard } from "@/src/components/FeedCard.component";
-import { SidebarNav } from "@/src/components/SidebarNav.component";
+import { EmptyState } from "@/src/components/EmptyState/EmptyState.component";
+import { FeedCard } from "@/src/components/FeedCard/FeedCard.component";
+import { SidebarNav } from "@/src/components/SidebarNav/SidebarNav.component";
 import { db } from "@/src/lib/db";
 
 export default async function Page() {
@@ -13,24 +13,27 @@ export default async function Page() {
         take: 20,
       },
     },
-    orderBy: {
-      name: "asc",
-    },
   });
 
-  const activeFeeds = feeds.filter((feed) => feed.posts.length > 0);
+  const activeFeeds = feeds
+    .filter((feed) => feed.posts.length > 0)
+    .sort((a, b) => {
+      // Sort by most recent post update
+      const aLastUpdate = a.posts[0]?.lastUpdatedAt.getTime() || 0;
+      const bLastUpdate = b.posts[0]?.lastUpdatedAt.getTime() || 0;
+      return bLastUpdate - aLastUpdate; // Descending order
+    });
+
   const hasAnyPosts = activeFeeds.length > 0;
 
   return (
     <main className="main-container layout-grid">
       <div className="sidebar-column">
-        <div className="sticky top-8">
-          {hasAnyPosts && (
-            <SidebarNav
-              feeds={activeFeeds.map((f) => ({ id: f.id, name: f.name }))}
-            />
-          )}
-        </div>
+        {hasAnyPosts && (
+          <SidebarNav
+            feeds={activeFeeds.map((f) => ({ id: f.id, name: f.name }))}
+          />
+        )}
       </div>
       <div className="content-column">
         {!hasAnyPosts && <EmptyState />}

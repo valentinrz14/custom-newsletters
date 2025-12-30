@@ -1,6 +1,11 @@
-import { render, screen, fireEvent } from "@testing-library/react";
-import { FeedCard } from "./FeedCard.component";
+import { afterEach, describe, expect, it } from "bun:test";
 import type { Feed, Post } from "@prisma/client";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { FeedCard } from "./FeedCard.component";
+
+afterEach(() => {
+  cleanup();
+});
 
 const mockFeed: Feed & { posts: Post[] } = {
   id: "bun",
@@ -29,16 +34,16 @@ describe("FeedCard", () => {
     render(<FeedCard feed={mockFeed} />);
 
     expect(screen.getByText("Bun")).toBeInTheDocument();
-    expect(screen.getAllByRole("article")).toHaveLength(5); // Should show 5 initially
+    expect(screen.getAllByTestId("post-card")).toHaveLength(3);
   });
 
   it("expands to show all posts when button is clicked", () => {
     render(<FeedCard feed={mockFeed} />);
 
-    const button = screen.getByRole("button", { name: /Ver 5 más/i });
+    const button = screen.getByRole("button", { name: /Ver 7 más/i });
     fireEvent.click(button);
 
-    expect(screen.getAllByRole("article")).toHaveLength(10);
+    expect(screen.getAllByTestId("post-card")).toHaveLength(10);
     expect(screen.getByText("Ver menos")).toBeInTheDocument();
   });
 });
