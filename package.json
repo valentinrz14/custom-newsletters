@@ -9,7 +9,9 @@
     "start": "next start",
     "lint": "biome check ./src --diagnostic-level=error",
     "test": "jest --coverage --runInBand --bail --no-cache --forceExit",
-    "types": "tsc -p tsconfig.json --noEmit --skipLibCheck"
+    "types": "tsc -p tsconfig.json --noEmit",
+    "typecheck": "tsc --noEmit",
+    "vercel:check": "next build"
   },
   "dependencies": {
     "@prisma/adapter-libsql": "^7.2.0",

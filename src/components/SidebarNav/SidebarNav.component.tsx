@@ -50,7 +50,7 @@ export function SidebarNav({ feeds }: SidebarNavProps) {
       <nav className={styles.stickyNav}>
         <h3 className={styles.title}>Fuentes</h3>
         <ul className={styles.list}>
-          {feeds.map((feed) => (
+          {feeds.map((feed: { id: string; name: string }) => (
             <li key={feed.id}>
               <a
                 href={`#${feed.id}`}

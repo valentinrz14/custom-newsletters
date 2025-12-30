@@ -4,9 +4,15 @@ pre-commit:
     biome:
       run: bunx biome check ./src --diagnostic-level=error
     types:
-      run: bunx tsc --project ./tsconfig.json
+      run: bunx tsc --noEmit --project ./tsconfig.json
     test:
       run: bun test .
+
+# Optional: Uncomment to run full Next.js build before push (like Vercel does)
+# pre-push:
+#   commands:
+#     build:
+#       run: bun run build
 
 commit-msg:
   commands:

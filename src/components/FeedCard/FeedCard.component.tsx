@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import type { Post } from "@prisma/client";
 import { formatDate } from "@/src/lib/date-utils";
 import { PostCard } from "../PostCard/PostCard.component";
 import styles from "./FeedCard.module.css";
@@ -26,7 +27,7 @@ export function FeedCard({ feed }: FeedCardProps) {
         )}
       </header>
       <div className={styles.postsContainer}>
-        {displayedPosts.map((post) => (
+        {displayedPosts.map((post: Post) => (
           <PostCard key={post.id} post={post} />
         ))}
       </div>
