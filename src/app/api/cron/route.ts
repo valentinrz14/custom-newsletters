@@ -4,12 +4,17 @@ import { hashContent } from "@/src/lib/hash";
 import { sendMail } from "@/src/lib/mail";
 import { scrapeAllFeeds } from "@/src/lib/scrapper";
 
-export async function GET() {
-  try {
-    console.log("🚀 Starting weekly feed scraping...");
+export async function GET(request: Request) {
+  const authHeader = request.headers.get("authorization");
+  const cronSecret = process.env.CRON_SECRET;
 
+  if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
+    console.error("❌ Unauthorized cron request");
+    return Response.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  try {
     for (const feedConfig of FEEDS) {
-      // Don't translate feed names (they are proper nouns like "React", "Next.js")
       await db.feed.upsert({
         where: { id: feedConfig.id },
         create: {

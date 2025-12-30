@@ -3,7 +3,15 @@ import { FEEDS } from "@/src/lib/feeds";
 import { hashContent } from "@/src/lib/hash";
 import { scrapeAllFeeds } from "@/src/lib/scrapper";
 
-export async function GET() {
+export async function GET(request: Request) {
+  const authHeader = request.headers.get("authorization");
+  const cronSecret = process.env.CRON_SECRET;
+
+  if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
+    console.error("❌ Unauthorized scrape request");
+    return Response.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   try {
     for (const feedConfig of FEEDS) {
       await db.feed.upsert({
