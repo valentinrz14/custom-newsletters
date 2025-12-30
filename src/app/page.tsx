@@ -32,7 +32,7 @@ export default async function Page() {
       <div className="sidebar-column">
         {hasAnyPosts && (
           <SidebarNav
-            feeds={activeFeeds.map((f) => ({ id: f.id, name: f.name }))}
+            feeds={activeFeeds.map((f: FeedWithPosts) => ({ id: f.id, name: f.name }))}
           />
         )}
       </div>
