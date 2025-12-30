@@ -3,6 +3,6 @@ import { defineConfig } from "prisma/config";
 export default defineConfig({
   schema: "prisma/schema.prisma",
   datasource: {
-    url: "file:./prisma/db.sqlite",
+    url: process.env.DATABASE_URL ?? "file:./prisma/db.sqlite",
   },
 });
