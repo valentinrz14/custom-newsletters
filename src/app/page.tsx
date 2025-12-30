@@ -3,6 +3,8 @@ import { FeedCard } from "@/src/components/FeedCard/FeedCard.component";
 import { SidebarNav } from "@/src/components/SidebarNav/SidebarNav.component";
 import { db } from "@/src/lib/db";
 
+export const dynamic = "force-dynamic";
+
 export default async function Page() {
   const feeds = await db.feed.findMany({
     include: {
