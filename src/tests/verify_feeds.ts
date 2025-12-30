@@ -7,18 +7,22 @@ async function verifyFeeds() {
   for (const feed of FEEDS) {
     console.log(`\nTesting feed: ${feed.name} (${feed.url})...`);
     try {
-      const posts = await scrapeFeed(feed);
-      if (posts.length > 0) {
-        console.log(`✅ Success! Found ${posts.length} posts.`);
-        console.log(`   Sample title: "${posts[0].title}"`);
-        console.log(`   Sample url:   "${posts[0].url}"`);
-      } else {
+      const result = await scrapeFeed(feed);
+      if (result.success && result.posts.length > 0) {
+        console.log(`✅ Success! Found ${result.posts.length} posts.`);
+        console.log(`   Sample title: "${result.posts[0].title}"`);
+        console.log(`   Sample url:   "${result.posts[0].url}"`);
+      } else if (result.success) {
         console.warn(
           `⚠️  Warning: No posts found for ${feed.name}. Check selectors.`
         );
+      } else {
+        console.error(
+          `❌ Error scraping ${feed.name}: ${result.error} (${result.errorType})`
+        );
       }
     } catch (error) {
-      console.error(`❌ Error scraping ${feed.name}:`, error);
+      console.error(`❌ Unexpected error scraping ${feed.name}:`, error);
     }
   }
 }

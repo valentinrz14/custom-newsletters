@@ -6,7 +6,7 @@
   background: var(--bg-secondary);
   border-radius: var(--radius-md);
   padding: 1.5rem;
-  transition: all 0.2s ease;
+  transition: all 0.2s ease, opacity 0.3s ease;
   border: 1px solid rgba(255, 255, 255, 0.05);
   cursor: pointer;
   overflow: hidden;

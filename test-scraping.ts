@@ -8,6 +8,7 @@ import { scrapeAllFeeds } from "./src/lib/scrapper";
 
 const adapter = new PrismaLibSql({
   url: process.env.DATABASE_URL || "file:./prisma/db.sqlite",
+  authToken: process.env.DATABASE_AUTH_TOKEN,
 });
 
 const db = new PrismaClient({ adapter });
@@ -30,10 +31,12 @@ async function main() {
         id: feedConfig.id,
         name: feedConfig.name,
         url: feedConfig.url,
+        category: feedConfig.category,
       },
       update: {
         name: feedConfig.name,
         url: feedConfig.url,
+        category: feedConfig.category,
       },
     });
     console.log(`  ✓ Feed: ${feedConfig.name}`);
@@ -42,18 +45,24 @@ async function main() {
 
   // Scrapear
   console.log("🔍 Scrapeando feeds...");
-  const scrapedData = await scrapeAllFeeds(FEEDS);
+  const scrapeResults = await scrapeAllFeeds(FEEDS);
   console.log("");
 
   let newPostsCount = 0;
   let updatedPostsCount = 0;
   let unchangedPostsCount = 0;
+  let successfulFeeds = 0;
+  let failedFeeds = 0;
 
   // Procesar posts
-  for (const [feedId, scrapedPosts] of scrapedData.entries()) {
-    console.log(`📰 Procesando ${scrapedPosts.length} posts de ${feedId}...`);
+  for (const result of scrapeResults) {
+    const feedId = result.feedId;
 
-    for (const scrapedPost of scrapedPosts) {
+    if (result.success) {
+      console.log(`📰 Procesando ${result.posts.length} posts de ${feedId}...`);
+      successfulFeeds++;
+
+      for (const scrapedPost of result.posts) {
       const contentHash = hashContent(scrapedPost.content);
 
       const existingPost = await db.post.findUnique({
@@ -91,17 +100,36 @@ async function main() {
           },
         });
         updatedPostsCount++;
-      } else {
-        unchangedPostsCount++;
+        } else {
+          unchangedPostsCount++;
+        }
       }
-    }
 
-    await db.feed.update({
-      where: { id: feedId },
-      data: {
-        lastScrapedAt: new Date(),
-      },
-    });
+      await db.feed.update({
+        where: { id: feedId },
+        data: {
+          lastScrapedAt: new Date(),
+          lastSuccessfulScrapeAt: new Date(),
+          scrapingStatus: "success",
+          lastErrorMessage: null,
+          consecutiveFailures: 0,
+        },
+      });
+    } else {
+      console.log(`❌ Error al scrapear ${feedId}: ${result.error}`);
+      failedFeeds++;
+
+      const currentFeed = await db.feed.findUnique({ where: { id: feedId } });
+      await db.feed.update({
+        where: { id: feedId },
+        data: {
+          lastScrapedAt: new Date(),
+          scrapingStatus: "error",
+          lastErrorMessage: result.error || "Unknown error",
+          consecutiveFailures: (currentFeed?.consecutiveFailures || 0) + 1,
+        },
+      });
+    }
   }
 
   console.log("");
@@ -112,6 +140,8 @@ async function main() {
   console.log(
     `  📊 Total: ${newPostsCount + updatedPostsCount + unchangedPostsCount}`
   );
+  console.log(`  ✅ Feeds exitosos: ${successfulFeeds}`);
+  console.log(`  ❌ Feeds fallidos: ${failedFeeds}`);
 }
 
 main()

@@ -9,6 +9,14 @@ export interface ScrapedPost {
   publishedAt: Date | null;
 }
 
+export interface ScrapeResult {
+  feedId: string;
+  success: boolean;
+  posts: ScrapedPost[];
+  error?: string;
+  errorType?: "network" | "parse" | "timeout" | "ssl" | "unknown";
+}
+
 /**
  * Normaliza una URL relativa convirtiéndola en absoluta
  */
@@ -59,35 +67,94 @@ function parseDate(dateStr: string | undefined): Date | null {
   try {
     const date = new Date(dateStr);
     if (!Number.isNaN(date.getTime())) return date;
-  } catch {
-    // Ignorar errores de parsing
-  }
+  } catch {}
 
   return null;
 }
 
-async function fetchWithRetry(url: string, retries = 3): Promise<Response> {
+async function fetchWithRetry(
+  url: string,
+  retries = 3,
+  timeout = 10000
+): Promise<Response> {
   for (let i = 0; i < retries; i++) {
     try {
-      const res = await fetch(url);
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), timeout);
+
+      const res = await fetch(url, {
+        signal: controller.signal,
+        headers: {
+          "User-Agent":
+            "Mozilla/5.0 (compatible; FeedAggregator/1.0; +https://github.com)",
+        },
+      });
+
+      clearTimeout(timeoutId);
+
       if (res.ok) return res;
+
+      // If not ok but not a network error, throw immediately
+      if (res.status >= 400) {
+        throw new Error(
+          `HTTP ${res.status}: ${res.statusText} for URL: ${url}`
+        );
+      }
     } catch (e) {
-      if (i === retries - 1) throw e;
+      const error = e as Error & { cause?: Error & { code?: string } };
+
+      // Log detailed error info
+      console.error(
+        `Fetch attempt ${i + 1}/${retries} failed for ${url}:`,
+        error.message
+      );
+
+      // Check for SSL/certificate errors
+      const isCertError =
+        error.cause?.code === "SELF_SIGNED_CERT_IN_CHAIN" ||
+        error.cause?.code === "UNABLE_TO_VERIFY_LEAF_SIGNATURE" ||
+        error.message.includes("certificate");
+
+      // Don't retry on certain errors
+      if (error.message.includes("404") || error.message.includes("410")) {
+        throw new Error(`Feed not found (${error.message})`);
+      }
+
+      if (isCertError) {
+        throw new Error(
+          `SSL certificate error for ${url}. This feed may have an invalid or self-signed certificate.`
+        );
+      }
+
+      // On last retry, throw with more context
+      if (i === retries - 1) {
+        throw new Error(
+          `Failed to fetch ${url} after ${retries} retries: ${error.message}`
+        );
+      }
     }
+
+    // Wait before retrying with exponential backoff
     await new Promise((resolve) => setTimeout(resolve, 1000 * (i + 1)));
   }
+
   throw new Error(`Failed to fetch ${url} after ${retries} retries`);
 }
 
 /**
  * Extrae posts de un feed específico usando sus selectores
  */
-export async function scrapeFeed(feed: FeedConfig): Promise<ScrapedPost[]> {
+export async function scrapeFeed(feed: FeedConfig): Promise<ScrapeResult> {
   try {
     const response = await fetchWithRetry(feed.url);
     if (!response.ok) {
-      console.error(`Failed to fetch ${feed.url}: ${response.status}`);
-      return [];
+      return {
+        feedId: feed.id,
+        success: false,
+        posts: [],
+        error: `HTTP ${response.status}: ${response.statusText}`,
+        errorType: "network",
+      };
     }
 
     const html = await response.text();
@@ -112,7 +179,6 @@ export async function scrapeFeed(feed: FeedConfig): Promise<ScrapedPost[]> {
 
       let href = linkElement.attr("href");
 
-      // If no href and it's an XML feed (or we want to fallback), check text content
       if (!href && feed.isXml) {
         href = linkElement.text().trim();
       }
@@ -135,12 +201,10 @@ export async function scrapeFeed(feed: FeedConfig): Promise<ScrapedPost[]> {
         const rawContent = contentElements
           .slice(0, 3)
           .map((_, el) => {
-            // Si el elemento contiene HTML (común en RSS), obtener el HTML
             const html = $(el).html();
             if (html && html.includes("<")) {
               return html;
             }
-            // Si no, obtener el texto
             return $(el).text();
           })
           .get()
@@ -153,7 +217,6 @@ export async function scrapeFeed(feed: FeedConfig): Promise<ScrapedPost[]> {
         content = cleanHtmlContent($container.text().trim().slice(0, 500));
       }
 
-      // Limitar el contenido final
       const finalContent = content.slice(0, 1000).trim();
 
       posts.push({
@@ -164,10 +227,50 @@ export async function scrapeFeed(feed: FeedConfig): Promise<ScrapedPost[]> {
       });
     });
 
-    return posts;
+    return {
+      feedId: feed.id,
+      success: true,
+      posts,
+    };
   } catch (error) {
-    console.error(`Error scraping ${feed.id}:`, error);
-    return [];
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown error";
+
+    let errorType: "network" | "parse" | "timeout" | "ssl" | "unknown" =
+      "unknown";
+    if (
+      errorMessage.includes("timeout") ||
+      errorMessage.includes("ETIMEDOUT") ||
+      errorMessage.includes("aborted")
+    ) {
+      errorType = "timeout";
+    } else if (
+      errorMessage.includes("certificate") ||
+      errorMessage.includes("SSL") ||
+      errorMessage.includes("SELF_SIGNED")
+    ) {
+      errorType = "ssl";
+    } else if (
+      errorMessage.includes("fetch") ||
+      errorMessage.includes("ENOTFOUND") ||
+      errorMessage.includes("ECONNREFUSED")
+    ) {
+      errorType = "network";
+    } else if (
+      errorMessage.includes("parse") ||
+      errorMessage.includes("selector")
+    ) {
+      errorType = "parse";
+    }
+
+    console.error(`Error scraping ${feed.id}:`, errorMessage);
+    return {
+      feedId: feed.id,
+      success: false,
+      posts: [],
+      error: errorMessage,
+      errorType,
+    };
   }
 }
 
@@ -176,13 +279,19 @@ export async function scrapeFeed(feed: FeedConfig): Promise<ScrapedPost[]> {
  */
 export async function scrapeAllFeeds(
   feeds: FeedConfig[]
-): Promise<Map<string, ScrapedPost[]>> {
-  const results = new Map<string, ScrapedPost[]>();
+): Promise<ScrapeResult[]> {
+  const results: ScrapeResult[] = [];
 
   for (const feed of feeds) {
-    const posts = await scrapeFeed(feed);
-    results.set(feed.id, posts);
-    console.log(`Scraped ${posts.length} posts from ${feed.name}`);
+    const result = await scrapeFeed(feed);
+    results.push(result);
+    console.log(
+      `Scraped ${feed.name}: ${
+        result.success
+          ? `${result.posts.length} posts`
+          : `ERROR - ${result.error}`
+      }`
+    );
   }
 
   return results;

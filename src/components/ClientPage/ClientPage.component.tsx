@@ -16,6 +16,8 @@ export function ClientPage({ feeds }: ClientPageProps) {
             feeds={feeds.map((f) => ({
               id: f.id,
               name: f.name,
+              category: f.category,
+              scrapingStatus: f.scrapingStatus,
             }))}
           />
         )}

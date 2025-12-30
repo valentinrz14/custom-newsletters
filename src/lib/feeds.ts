@@ -5,6 +5,7 @@ export const FeedConfigSchema = z.object({
   name: z.string(),
   url: z.string().url(),
   type: z.enum(["blog", "updates", "news"]),
+  category: z.enum(["Tech", "News", "Blogs"]),
   selectors: z.object({
     container: z.string().optional(),
     title: z.string(),
@@ -23,6 +24,7 @@ export const FEEDS: FeedConfig[] = [
     name: "React",
     url: "https://react.dev/blog",
     type: "blog",
+    category: "Tech",
     selectors: {
       container: "article",
       title: "h2, h1",
@@ -36,6 +38,7 @@ export const FEEDS: FeedConfig[] = [
     name: "React Native",
     url: "https://reactnative.dev/blog",
     type: "blog",
+    category: "Tech",
     selectors: {
       container: "article",
       title: "h2, h1",
@@ -49,6 +52,7 @@ export const FEEDS: FeedConfig[] = [
     name: "Cursor",
     url: "https://cursor.com/blog",
     type: "blog",
+    category: "Tech",
     selectors: {
       container: "article",
       title: "h2, h1",
@@ -62,6 +66,7 @@ export const FEEDS: FeedConfig[] = [
     name: "Bun",
     url: "https://bun.com/rss.xml",
     type: "blog",
+    category: "Tech",
     isXml: true,
     selectors: {
       container: "item",
@@ -76,6 +81,7 @@ export const FEEDS: FeedConfig[] = [
     name: "Biome",
     url: "https://biomejs.dev/blog/rss.xml",
     type: "blog",
+    category: "Tech",
     isXml: true,
     selectors: {
       container: "item",
@@ -90,6 +96,7 @@ export const FEEDS: FeedConfig[] = [
     name: "Expo",
     url: "https://expo.dev/blog/rss.xml",
     type: "blog",
+    category: "Tech",
     isXml: true,
     selectors: {
       container: "item",
@@ -104,6 +111,7 @@ export const FEEDS: FeedConfig[] = [
     name: "Hacking with Swift",
     url: "https://www.hackingwithswift.com/articles/rss",
     type: "news",
+    category: "News",
     isXml: true,
     selectors: {
       container: "item",
@@ -119,6 +127,7 @@ export const FEEDS: FeedConfig[] = [
     name: "React Status",
     url: "https://react.statuscode.com/rss/",
     type: "news",
+    category: "News",
     isXml: true,
     selectors: {
       container: "item",
@@ -133,6 +142,7 @@ export const FEEDS: FeedConfig[] = [
     name: "This Week In React",
     url: "https://thisweekinreact.com/articles/rss.xml",
     type: "news",
+    category: "News",
     isXml: true,
     selectors: {
       container: "item",
@@ -147,6 +157,7 @@ export const FEEDS: FeedConfig[] = [
     name: "Frontend Focus",
     url: "https://frontendfoc.us/rss/",
     type: "news",
+    category: "News",
     isXml: true,
     selectors: {
       container: "item",
@@ -161,6 +172,7 @@ export const FEEDS: FeedConfig[] = [
     name: "Mobile Dev Weekly",
     url: "https://mobiledevweekly.com/rss/",
     type: "news",
+    category: "News",
     isXml: true,
     selectors: {
       container: "item",
@@ -175,6 +187,7 @@ export const FEEDS: FeedConfig[] = [
     name: "Node Weekly",
     url: "https://nodeweekly.com/rss/",
     type: "news",
+    category: "News",
     isXml: true,
     selectors: {
       container: "item",
@@ -189,6 +202,7 @@ export const FEEDS: FeedConfig[] = [
     name: "JavaScript Weekly",
     url: "https://javascriptweekly.com/rss/",
     type: "news",
+    category: "News",
     isXml: true,
     selectors: {
       container: "item",
@@ -203,6 +217,7 @@ export const FEEDS: FeedConfig[] = [
     name: "Deno News",
     url: "https://deno.com/feed",
     type: "news",
+    category: "Tech",
     isXml: true,
     selectors: {
       container: "item",
@@ -217,6 +232,7 @@ export const FEEDS: FeedConfig[] = [
     name: "DevOps'ish",
     url: "https://devopsish.com/index.xml",
     type: "news",
+    category: "News",
     isXml: true,
     selectors: {
       container: "item",
@@ -231,6 +247,7 @@ export const FEEDS: FeedConfig[] = [
     name: "Increment",
     url: "https://increment.com/feed.xml",
     type: "blog",
+    category: "Blogs",
     isXml: true,
     selectors: {
       container: "item",
@@ -245,6 +262,7 @@ export const FEEDS: FeedConfig[] = [
     name: "Swift by Sundell",
     url: "https://swiftbysundell.com/rss",
     type: "blog",
+    category: "Tech",
     isXml: true,
     selectors: {
       container: "item",
@@ -259,6 +277,7 @@ export const FEEDS: FeedConfig[] = [
     name: "Lenny's Newsletter",
     url: "https://www.lennysnewsletter.com/feed",
     type: "blog",
+    category: "Blogs",
     isXml: true,
     selectors: {
       container: "item",
@@ -273,6 +292,7 @@ export const FEEDS: FeedConfig[] = [
     name: "Stratechery",
     url: "https://stratechery.com/rss",
     type: "blog",
+    category: "Blogs",
     isXml: true,
     selectors: {
       container: "item",
@@ -287,6 +307,7 @@ export const FEEDS: FeedConfig[] = [
     name: "GitHub Blog",
     url: "https://github.blog/feed/",
     type: "blog",
+    category: "Tech",
     isXml: true,
     selectors: {
       container: "item",
@@ -301,6 +322,7 @@ export const FEEDS: FeedConfig[] = [
     name: "Josh Comeau",
     url: "https://www.joshwcomeau.com/rss.xml", // Assumed based on common pattern if fetch succeeds
     type: "blog",
+    category: "Tech",
     isXml: true,
     selectors: {
       container: "item",
@@ -315,6 +337,7 @@ export const FEEDS: FeedConfig[] = [
     name: "Kent C. Dodds (Testing JS)",
     url: "https://kentcdodds.com/blog/rss.xml",
     type: "blog",
+    category: "Tech",
     isXml: true,
     selectors: {
       container: "item",
@@ -330,6 +353,7 @@ export const FEEDS: FeedConfig[] = [
     name: "Hacker News (Frontpage)",
     url: "https://hnrss.org/frontpage",
     type: "news",
+    category: "News",
     isXml: true,
     selectors: {
       container: "item",

@@ -9,20 +9,36 @@ import styles from "./PostCard.module.css";
 
 export function PostCard({ post }: PostCardProps) {
   const [showDetails, setShowDetails] = useState(false);
+  const [isRead, setIsRead] = useState(post.isRead);
   const showNewBadge = isNew(post.firstSeenAt);
   const showUpdatedBadge =
     !showNewBadge && isRecentlyUpdated(post.firstSeenAt, post.lastUpdatedAt);
 
+  const handleClick = async () => {
+    setShowDetails(!showDetails);
+
+    // Mark as read when expanding details
+    if (!isRead && !showDetails) {
+      setIsRead(true);
+      try {
+        await fetch(`/api/posts/${post.id}/read`, { method: "POST" });
+      } catch (error) {
+        console.error("Failed to mark as read:", error);
+      }
+    }
+  };
+
   return (
     <div
       className={`group ${styles.card}`}
-      onClick={() => setShowDetails(!showDetails)}
+      style={{ opacity: isRead ? 0.6 : 1 }}
+      onClick={handleClick}
       role="button"
       tabIndex={0}
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
-          setShowDetails(!showDetails);
+          handleClick();
         }
       }}
       aria-expanded={showDetails}

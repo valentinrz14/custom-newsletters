@@ -9,6 +9,7 @@ import type { FeedCardProps } from "./FeedCardProps.interfaces";
 
 export const FeedCard = memo(function FeedCard({ feed }: FeedCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [showError, setShowError] = useState(false);
 
   if (feed.posts.length === 0) return null;
 
@@ -16,14 +17,72 @@ export const FeedCard = memo(function FeedCard({ feed }: FeedCardProps) {
   const displayedPosts =
     isExpanded || !hasMore ? feed.posts : feed.posts.slice(0, 3);
 
+  const isHealthy = feed.scrapingStatus === "success";
+  const hasError = feed.scrapingStatus === "error";
+
   return (
     <section id={feed.id} className={`${styles.section} scroll-mt-24`}>
       <header className={styles.header}>
-        <h2 className={styles.title}>{feed.name}</h2>
-        {feed.lastScrapedAt && (
+        <div className={styles.titleRow}>
+          <h2 className={styles.title}>{feed.name}</h2>
+          <div className={styles.statusBadge}>
+            <span
+              className={`${styles.indicator} ${
+                isHealthy ? styles.indicatorSuccess : styles.indicatorError
+              }`}
+              title={isHealthy ? "Operativo" : "Error en actualización"}
+            />
+          </div>
+        </div>
+        {feed.lastSuccessfulScrapeAt && (
           <p className={styles.date}>
-            Última actualización: {formatDate(new Date(feed.lastScrapedAt))}
+            Última actualización exitosa:{" "}
+            {formatDate(new Date(feed.lastSuccessfulScrapeAt))}
           </p>
+        )}
+        {hasError && feed.lastErrorMessage && (
+          <div className={styles.errorSection}>
+            <button
+              type="button"
+              onClick={() => setShowError(!showError)}
+              className={styles.errorToggle}
+            >
+              <span className={styles.errorIcon}>⚠️</span>
+              <span>
+                Error al actualizar ({feed.consecutiveFailures} fallo
+                {feed.consecutiveFailures > 1 ? "s" : ""})
+              </span>
+              <svg
+                role="img"
+                aria-label="Expandir"
+                className={`${styles.expandIcon} ${
+                  showError ? styles.expandIconRotated : ""
+                }`}
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M19 9l-7 7-7-7"
+                />
+              </svg>
+            </button>
+            {showError && (
+              <div className={styles.errorDetails}>
+                <code className={styles.errorMessage}>
+                  {feed?.lastErrorMessage}
+                </code>
+                {feed.lastScrapedAt && (
+                  <p className={styles.errorTimestamp}>
+                    Último intento: {formatDate(new Date(feed.lastScrapedAt))}
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
         )}
       </header>
       <div className={styles.postsContainer}>

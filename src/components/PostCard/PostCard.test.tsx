@@ -19,6 +19,8 @@ const mockPost: Post = {
   feedId: "feed-1",
   publishedAt: new Date("2023-01-01"),
   contentHash: "mock-hash",
+  isRead: false,
+  readAt: null,
 };
 
 describe("PostCard", () => {

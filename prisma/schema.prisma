@@ -7,30 +7,40 @@ datasource db {
 }
 
 model Feed {
-  id            String   @id
-  name          String
-  url           String
-  lastScrapedAt DateTime?
-  posts         Post[]
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id                     String    @id
+  name                   String
+  url                    String
+  category               String    @default("Tech")
+  lastScrapedAt          DateTime?
+  lastSuccessfulScrapeAt DateTime?
+  scrapingStatus         String    @default("unknown")
+  lastErrorMessage       String?
+  consecutiveFailures    Int       @default(0)
+  posts                  Post[]
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
+
+  @@index([scrapingStatus])
 }
 
 model Post {
-  id            String   @id @default(cuid())
+  id            String    @id @default(cuid())
   feedId        String
-  feed          Feed     @relation(fields: [feedId], references: [id], onDelete: Cascade)
+  feed          Feed      @relation(fields: [feedId], references: [id], onDelete: Cascade)
   title         String
   url           String
   content       String?
   publishedAt   DateTime?
-  firstSeenAt   DateTime @default(now())
-  lastUpdatedAt DateTime @default(now())
+  firstSeenAt   DateTime  @default(now())
+  lastUpdatedAt DateTime  @default(now())
   contentHash   String
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  isRead        Boolean   @default(false)
+  readAt        DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 
   @@unique([feedId, url])
   @@index([feedId])
   @@index([lastUpdatedAt])
+  @@index([isRead])
 }

@@ -67,6 +67,18 @@ export function SidebarNav({ feeds }: SidebarNavProps) {
     setIsMenuOpen(false);
   };
 
+  // Group feeds by category
+  const feedsByCategory = feeds.reduce((acc, feed) => {
+    if (!acc[feed.category]) {
+      acc[feed.category] = [];
+    }
+    acc[feed.category].push(feed);
+    return acc;
+  }, {} as Record<string, typeof feeds>);
+
+  // Define category order
+  const categoryOrder = ["Tech", "News", "Blogs"];
+
   return (
     <>
       {/* Hamburger button - only visible on mobile when menu is closed */}
@@ -110,24 +122,44 @@ export function SidebarNav({ feeds }: SidebarNavProps) {
               ✕
             </button>
           </div>
-          <ul className={styles.list}>
-            {feeds.map((feed: { id: string; name: string }) => (
-              <li key={feed.id}>
-                <a
-                  href={`#${feed.id}`}
-                  className={`${styles.link} ${
-                    activeId === feed.id ? styles.active : ""
-                  }`}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handleFeedClick(feed.id);
-                  }}
-                >
-                  {feed.name}
-                </a>
-              </li>
-            ))}
-          </ul>
+          <div className={styles.categories}>
+            {categoryOrder.map((category) => {
+              const categoryFeeds = feedsByCategory[category];
+              if (!categoryFeeds || categoryFeeds.length === 0) return null;
+
+              return (
+                <div key={category} className={styles.categorySection}>
+                  <h4 className={styles.categoryTitle}>{category}</h4>
+                  <ul className={styles.list}>
+                    {categoryFeeds.map((feed) => (
+                      <li key={feed.id}>
+                        <a
+                          href={`#${feed.id}`}
+                          className={`${styles.link} ${
+                            activeId === feed.id ? styles.active : ""
+                          }`}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            handleFeedClick(feed.id);
+                          }}
+                        >
+                          <span className={styles.feedName}>{feed.name}</span>
+                          {feed.scrapingStatus === "error" && (
+                            <span
+                              className={styles.errorIndicator}
+                              title="Error en actualización"
+                            >
+                              ⚠️
+                            </span>
+                          )}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              );
+            })}
+          </div>
         </nav>
       </aside>
     </>

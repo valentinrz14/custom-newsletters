@@ -20,69 +20,103 @@ export async function GET(request: Request) {
           id: feedConfig.id,
           name: feedConfig.name,
           url: feedConfig.url,
+          category: feedConfig.category,
         },
         update: {
           name: feedConfig.name,
           url: feedConfig.url,
+          category: feedConfig.category,
         },
       });
     }
 
-    const scrapedData = await scrapeAllFeeds(FEEDS);
+    const scrapeResults = await scrapeAllFeeds(FEEDS);
 
     let newPostsCount = 0;
     let updatedPostsCount = 0;
     let unchangedPostsCount = 0;
+    let successfulFeeds = 0;
+    let failedFeeds = 0;
 
-    for (const [feedId, scrapedPosts] of scrapedData.entries()) {
-      for (const scrapedPost of scrapedPosts) {
-        const contentHash = hashContent(scrapedPost.content);
+    for (const result of scrapeResults) {
+      const feedId = result.feedId;
 
-        const existingPost = await db.post.findUnique({
-          where: {
-            feedId_url: {
-              feedId,
-              url: scrapedPost.url,
-            },
+      // Update feed status based on scraping result
+      const currentFeed = await db.feed.findUnique({ where: { id: feedId } });
+
+      if (result.success) {
+        await db.feed.update({
+          where: { id: feedId },
+          data: {
+            lastScrapedAt: new Date(),
+            lastSuccessfulScrapeAt: new Date(),
+            scrapingStatus: "success",
+            lastErrorMessage: null,
+            consecutiveFailures: 0,
           },
         });
+        successfulFeeds++;
 
-        if (!existingPost) {
-          await db.post.create({
-            data: {
-              feedId,
-              title: scrapedPost.title,
-              url: scrapedPost.url,
-              content: scrapedPost.content,
-              publishedAt: scrapedPost.publishedAt,
-              contentHash,
-              firstSeenAt: new Date(),
-              lastUpdatedAt: new Date(),
+        // Process posts
+        for (const scrapedPost of result.posts) {
+          const contentHash = hashContent(scrapedPost.content);
+
+          const existingPost = await db.post.findUnique({
+            where: {
+              feedId_url: {
+                feedId,
+                url: scrapedPost.url,
+              },
             },
           });
-          newPostsCount++;
-        } else if (existingPost.contentHash !== contentHash) {
-          await db.post.update({
-            where: { id: existingPost.id },
-            data: {
-              title: scrapedPost.title,
-              content: scrapedPost.content,
-              contentHash,
-              lastUpdatedAt: new Date(),
-              publishedAt: scrapedPost.publishedAt || existingPost.publishedAt,
-            },
-          });
-          updatedPostsCount++;
-        } else {
-          unchangedPostsCount++;
+
+          if (!existingPost) {
+            await db.post.create({
+              data: {
+                feedId,
+                title: scrapedPost.title,
+                url: scrapedPost.url,
+                content: scrapedPost.content,
+                publishedAt: scrapedPost.publishedAt,
+                contentHash,
+                firstSeenAt: new Date(),
+                lastUpdatedAt: new Date(),
+              },
+            });
+            newPostsCount++;
+          } else if (existingPost.contentHash !== contentHash) {
+            await db.post.update({
+              where: { id: existingPost.id },
+              data: {
+                title: scrapedPost.title,
+                content: scrapedPost.content,
+                contentHash,
+                lastUpdatedAt: new Date(),
+                publishedAt:
+                  scrapedPost.publishedAt || existingPost.publishedAt,
+              },
+            });
+            updatedPostsCount++;
+          } else {
+            unchangedPostsCount++;
+          }
         }
+      } else {
+        // Handle scraping failure
+        const consecutiveFailures =
+          (currentFeed?.consecutiveFailures || 0) + 1;
+
+        await db.feed.update({
+          where: { id: feedId },
+          data: {
+            lastScrapedAt: new Date(),
+            scrapingStatus: "error",
+            lastErrorMessage: result.error || "Unknown error",
+            consecutiveFailures,
+          },
+        });
+        failedFeeds++;
       }
-      await db.feed.update({
-        where: { id: feedId },
-        data: {
-          lastScrapedAt: new Date(),
-        },
-      });
     }
 
     return Response.json({
@@ -92,6 +126,10 @@ export async function GET(request: Request) {
         updated: updatedPostsCount,
         unchanged: unchangedPostsCount,
         total: newPostsCount + updatedPostsCount + unchangedPostsCount,
+      },
+      feeds: {
+        successful: successfulFeeds,
+        failed: failedFeeds,
       },
     });
   } catch (error) {
