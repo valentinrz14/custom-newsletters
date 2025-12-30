@@ -4,6 +4,8 @@
   padding: 2rem;
   box-shadow: var(--shadow-md);
   transition: all 0.3s ease;
+  overflow: hidden;
+  max-width: 100%;
 }
 
 .section:hover {
@@ -26,6 +28,9 @@
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  max-width: 100%;
 }
 
 .date {

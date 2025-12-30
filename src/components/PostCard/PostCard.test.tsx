@@ -25,11 +25,9 @@ describe("PostCard", () => {
   it("renders post title and content", () => {
     render(<PostCard post={mockPost} />);
 
-    // Title is now a heading, not a link
     const title = screen.getByRole("heading", { name: /Test Post Title/i });
     expect(title).toBeInTheDocument();
 
-    // Content snippet is shown initially
     expect(screen.getByText(/This is a test post/i)).toBeInTheDocument();
   });
 

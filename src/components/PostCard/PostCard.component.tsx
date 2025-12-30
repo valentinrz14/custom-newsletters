@@ -42,7 +42,7 @@ export function PostCard({ post }: PostCardProps) {
         </div>
       </div>
       <div className={styles.meta}>
-        <time className={styles.date}>
+        <time className={styles.date} suppressHydrationWarning>
           {getRelativeTime(post.lastUpdatedAt)}
         </time>
       </div>

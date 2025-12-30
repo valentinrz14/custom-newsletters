@@ -22,6 +22,35 @@ function normalizeUrl(url: string, baseUrl: string): string {
 }
 
 /**
+ * Limpia el contenido HTML y extrae solo texto
+ */
+function cleanHtmlContent(content: string): string {
+  if (!content) return "";
+
+  if (content.includes("<") && content.includes(">")) {
+    const $ = cheerio.load(content);
+    content = $.text();
+  }
+
+  content = decode(content);
+
+  const footerPatterns = [
+    /The post .+ appeared first on .+\./gi,
+    /Read more on .+\./gi,
+    /Continue reading on .+\./gi,
+    /This article was originally published on .+\./gi,
+  ];
+
+  for (const pattern of footerPatterns) {
+    content = content.replace(pattern, "");
+  }
+
+  content = content.replace(/\s+/g, " ").trim();
+
+  return content;
+}
+
+/**
  * Intenta parsear una fecha desde diferentes formatos
  */
 function parseDate(dateStr: string | undefined): Date | null {
@@ -103,23 +132,34 @@ export async function scrapeFeed(feed: FeedConfig): Promise<ScrapedPost[]> {
       let content = "";
       if (feed.selectors.content) {
         const contentElements = $container.find(feed.selectors.content);
-        content = decode(
-          contentElements
-            .slice(0, 3)
-            .map((_, el) => $(el).text().trim())
-            .get()
-            .join(" ")
-        );
+        const rawContent = contentElements
+          .slice(0, 3)
+          .map((_, el) => {
+            // Si el elemento contiene HTML (común en RSS), obtener el HTML
+            const html = $(el).html();
+            if (html && html.includes("<")) {
+              return html;
+            }
+            // Si no, obtener el texto
+            return $(el).text();
+          })
+          .get()
+          .join(" ");
+
+        content = cleanHtmlContent(rawContent);
       }
 
       if (!content) {
-        content = decode($container.text().trim().slice(0, 500));
+        content = cleanHtmlContent($container.text().trim().slice(0, 500));
       }
+
+      // Limitar el contenido final
+      const finalContent = content.slice(0, 1000).trim();
 
       posts.push({
         title,
         url,
-        content: content.slice(0, 1000),
+        content: finalContent,
         publishedAt,
       });
     });
