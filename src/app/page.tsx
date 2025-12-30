@@ -1,6 +1,4 @@
-import { EmptyState } from "@/src/components/EmptyState/EmptyState.component";
-import { FeedCard } from "@/src/components/FeedCard/FeedCard.component";
-import { SidebarNav } from "@/src/components/SidebarNav/SidebarNav.component";
+import { ClientPage } from "@/src/components/ClientPage/ClientPage.component";
 import { db } from "@/src/lib/db";
 
 export const dynamic = "force-dynamic";
@@ -27,28 +25,5 @@ export default async function Page() {
       return bLastUpdate - aLastUpdate;
     });
 
-  const hasAnyPosts = activeFeeds.length > 0;
-
-  return (
-    <main className="main-container layout-grid">
-      <div className="sidebar-column">
-        {hasAnyPosts && (
-          <SidebarNav
-            feeds={activeFeeds.map((f: FeedWithPosts) => ({
-              id: f.id,
-              name: f.nameEs || f.name,
-            }))}
-          />
-        )}
-      </div>
-      <div className="content-column">
-        {!hasAnyPosts && <EmptyState />}
-        <div className="feeds-container">
-          {activeFeeds.map((feed: FeedWithPosts) => (
-            <FeedCard key={feed.id} feed={feed} />
-          ))}
-        </div>
-      </div>
-    </main>
-  );
+  return <ClientPage feeds={activeFeeds} />;
 }

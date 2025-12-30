@@ -6,6 +6,7 @@ import styles from "./SidebarNav.module.css";
 
 export function SidebarNav({ feeds }: SidebarNavProps) {
   const [activeId, setActiveId] = useState<string>("");
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const navRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
@@ -45,32 +46,90 @@ export function SidebarNav({ feeds }: SidebarNavProps) {
     }
   }, [activeId]);
 
+  // Prevent body scroll when menu is open
+  useEffect(() => {
+    if (isMenuOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isMenuOpen]);
+
+  const handleFeedClick = (feedId: string) => {
+    document.getElementById(feedId)?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+    setIsMenuOpen(false);
+  };
+
   return (
-    <aside className={styles.sidebar} ref={navRef}>
-      <nav className={styles.stickyNav}>
-        <h3 className={styles.title}>Fuentes</h3>
-        <ul className={styles.list}>
-          {feeds.map((feed: { id: string; name: string }) => (
-            <li key={feed.id}>
-              <a
-                href={`#${feed.id}`}
-                className={`${styles.link} ${
-                  activeId === feed.id ? styles.active : ""
-                }`}
-                onClick={(e) => {
-                  e.preventDefault();
-                  document.getElementById(feed.id)?.scrollIntoView({
-                    behavior: "smooth",
-                    block: "start",
-                  });
-                }}
-              >
-                {feed.name}
-              </a>
-            </li>
-          ))}
-        </ul>
-      </nav>
-    </aside>
+    <>
+      {/* Hamburger button - only visible on mobile when menu is closed */}
+      {!isMenuOpen && (
+        <button
+          type="button"
+          className={styles.hamburger}
+          onClick={() => setIsMenuOpen(true)}
+          aria-label="Abrir menú"
+          aria-expanded={false}
+        >
+          <span className={styles.hamburgerLine}></span>
+          <span className={styles.hamburgerLine}></span>
+          <span className={styles.hamburgerLine}></span>
+        </button>
+      )}
+
+      {/* Overlay backdrop */}
+      {isMenuOpen && (
+        <div
+          className={styles.overlay}
+          onClick={() => setIsMenuOpen(false)}
+          aria-hidden="true"
+        />
+      )}
+
+      {/* Sidebar */}
+      <aside
+        className={`${styles.sidebar} ${isMenuOpen ? styles.sidebarOpen : ""}`}
+        ref={navRef}
+      >
+        <nav className={styles.stickyNav}>
+          <div className={styles.header}>
+            <h3 className={styles.title}>Fuentes</h3>
+            <button
+              type="button"
+              className={styles.closeButton}
+              onClick={() => setIsMenuOpen(false)}
+              aria-label="Cerrar menú"
+            >
+              ✕
+            </button>
+          </div>
+          <ul className={styles.list}>
+            {feeds.map((feed: { id: string; name: string }) => (
+              <li key={feed.id}>
+                <a
+                  href={`#${feed.id}`}
+                  className={`${styles.link} ${
+                    activeId === feed.id ? styles.active : ""
+                  }`}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleFeedClick(feed.id);
+                  }}
+                >
+                  {feed.name}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      </aside>
+    </>
   );
 }

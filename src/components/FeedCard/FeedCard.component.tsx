@@ -1,13 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, memo } from "react";
 import type { Post } from "@prisma/client";
 import { formatDate } from "@/src/lib/date-utils";
 import { PostCard } from "../PostCard/PostCard.component";
 import styles from "./FeedCard.module.css";
 import type { FeedCardProps } from "./FeedCardProps.interfaces";
 
-export function FeedCard({ feed }: FeedCardProps) {
+export const FeedCard = memo(function FeedCard({ feed }: FeedCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
 
   if (feed.posts.length === 0) return null;
@@ -16,12 +16,10 @@ export function FeedCard({ feed }: FeedCardProps) {
   const displayedPosts =
     isExpanded || !hasMore ? feed.posts : feed.posts.slice(0, 3);
 
-  const displayName = feed.nameEs || feed.name;
-
   return (
     <section id={feed.id} className={`${styles.section} scroll-mt-24`}>
       <header className={styles.header}>
-        <h2 className={styles.title}>{displayName}</h2>
+        <h2 className={styles.title}>{feed.name}</h2>
         {feed.lastScrapedAt && (
           <p className={styles.date}>
             Última actualización: {formatDate(new Date(feed.lastScrapedAt))}
@@ -63,4 +61,4 @@ export function FeedCard({ feed }: FeedCardProps) {
       )}
     </section>
   );
-}
+});

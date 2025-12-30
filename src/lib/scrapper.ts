@@ -1,4 +1,5 @@
 import * as cheerio from "cheerio";
+import { decode } from "he";
 import type { FeedConfig } from "./feeds";
 
 export interface ScrapedPost {
@@ -72,7 +73,7 @@ export async function scrapeFeed(feed: FeedConfig): Promise<ScrapedPost[]> {
       const $container = $(container);
 
       const titleElement = $container.find(feed.selectors.title).first();
-      const title = titleElement.text().trim();
+      const title = decode(titleElement.text().trim());
       if (!title) return;
 
       let linkElement = titleElement.find("a");
@@ -102,15 +103,17 @@ export async function scrapeFeed(feed: FeedConfig): Promise<ScrapedPost[]> {
       let content = "";
       if (feed.selectors.content) {
         const contentElements = $container.find(feed.selectors.content);
-        content = contentElements
-          .slice(0, 3)
-          .map((_, el) => $(el).text().trim())
-          .get()
-          .join(" ");
+        content = decode(
+          contentElements
+            .slice(0, 3)
+            .map((_, el) => $(el).text().trim())
+            .get()
+            .join(" ")
+        );
       }
 
       if (!content) {
-        content = $container.text().trim().slice(0, 500);
+        content = decode($container.text().trim().slice(0, 500));
       }
 
       posts.push({
