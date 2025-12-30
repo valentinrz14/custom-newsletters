@@ -15,7 +15,7 @@ export default async function Page() {
     },
   });
 
-  type FeedWithPosts = typeof feeds[number];
+  type FeedWithPosts = (typeof feeds)[number];
 
   const activeFeeds = feeds
     .filter((feed: FeedWithPosts) => feed.posts.length > 0)
@@ -32,14 +32,17 @@ export default async function Page() {
       <div className="sidebar-column">
         {hasAnyPosts && (
           <SidebarNav
-            feeds={activeFeeds.map((f: FeedWithPosts) => ({ id: f.id, name: f.name }))}
+            feeds={activeFeeds.map((f: FeedWithPosts) => ({
+              id: f.id,
+              name: f.name,
+            }))}
           />
         )}
       </div>
       <div className="content-column">
         {!hasAnyPosts && <EmptyState />}
         <div className="feeds-container">
-          {activeFeeds.map((feed) => (
+          {activeFeeds.map((feed: FeedWithPosts) => (
             <FeedCard key={feed.id} feed={feed} />
           ))}
         </div>

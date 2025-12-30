@@ -9,4 +9,6 @@ pre-commit:
       run: bun test .
 
 commit-msg:
-  run: bunx commitlint --edit $1
+  commands:
+    commitlint:
+      run: bunx commitlint --edit {1}
